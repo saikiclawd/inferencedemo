@@ -24,7 +24,7 @@ context:
 
 **Ask First:** Changing the embedding model or PostgreSQL vector dimensions; choosing a model larger than the likely RTX 4000 Ada VRAM envelope; adding Kubernetes GPU manifests that require specific cluster/node-pool names; removing Claude support entirely rather than making the OpenAI-compatible backend the default.
 
-**Never:** Do not implement autonomous agent tools, cart mutation through the LLM, payment behavior, or inventory logic in this change. Do not rewrite the backend assistant WebSocket or frontend BookBot unless required by the SGLang client contract.
+**Never:** Do not implement autonomous tool-use workflows, cart mutation through the LLM, payment behavior, or inventory logic in this change. Do not rewrite the backend assistant WebSocket or frontend BookBot unless required by the SGLang client contract.
 
 ## I/O & Edge-Case Matrix
 

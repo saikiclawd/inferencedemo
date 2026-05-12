@@ -13,6 +13,15 @@ spec:
       labels:
         app: meilisearch
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node.kubernetes.io/instance-type
+                    operator: NotIn
+                    values:
+                      - g2-gpu-rtx4000a1-s
       containers:
         - name: meilisearch
           image: getmeili/meilisearch:v1.8

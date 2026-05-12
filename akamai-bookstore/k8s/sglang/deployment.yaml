@@ -5,6 +5,8 @@ metadata:
   namespace: bookstore
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: sglang
@@ -13,6 +15,15 @@ spec:
       labels:
         app: sglang
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node.kubernetes.io/instance-type
+                    operator: In
+                    values:
+                      - g2-gpu-rtx4000a1-s
       containers:
         - name: sglang
           image: lmsysorg/sglang:latest-runtime
@@ -55,9 +66,13 @@ spec:
               port: 30000
             initialDelaySeconds: 120
             periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 10
           livenessProbe:
             httpGet:
               path: /health
               port: 30000
             initialDelaySeconds: 180
             periodSeconds: 60
+            timeoutSeconds: 10
+            failureThreshold: 5
