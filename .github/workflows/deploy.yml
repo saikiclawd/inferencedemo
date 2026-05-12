@@ -128,8 +128,7 @@ jobs:
             sleep 10
           done
           if [ -z "$IP" ]; then
-            echo "Timed out waiting for NodeBalancer IP"
-            exit 1
+            echo "::warning::Timed out waiting for NodeBalancer IP. Continuing with in-cluster deployment; public ingress will remain pending until the Linode NodeBalancer service limit is raised or an existing NodeBalancer is removed."
           fi
 
       - name: Apply base Kubernetes resources
