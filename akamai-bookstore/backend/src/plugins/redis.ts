@@ -6,6 +6,8 @@ import { config } from '../config.js'
 const redisPlugin: FastifyPluginAsync = async (fastify) => {
   await fastify.register(fastifyRedis, {
     url: config.REDIS_URL,
+    lazyConnect: true,
+    enableReadyCheck: false,
     family: 4,
     connectTimeout: 10_000,
     maxRetriesPerRequest: 3,
