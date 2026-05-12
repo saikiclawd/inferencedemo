@@ -25,6 +25,7 @@ spec:
       containers:
         - name: backend
           image: ghcr.io/saikiclawd/bookstore-backend:latest
+          terminationMessagePolicy: FallbackToLogsOnError
           ports:
             - containerPort: 3000
           envFrom:

@@ -19,6 +19,7 @@ import assistantRoute from './routes/assistant.js'
 
 export function buildApp() {
   const app = Fastify({
+    pluginTimeout: 30_000,
     logger: {
       level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
       transport:
