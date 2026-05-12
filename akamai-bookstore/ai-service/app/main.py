@@ -2,12 +2,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.dependencies import init_db, close_db, init_meili
 from app.routers import chat, embeddings
-from app.services.embedder import get_model
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    get_model()
     await init_db()
     init_meili()
     yield
