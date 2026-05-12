@@ -1,0 +1,51 @@
+{
+  "realm": "bookstore",
+  "enabled": true,
+  "displayName": "Bookstore",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "verifyEmail": false,
+  "accessTokenLifespan": 3600,
+  "refreshTokenMaxReuse": 0,
+  "ssoSessionMaxLifespan": 86400,
+  "clients": [
+    {
+      "clientId": "bookstore-web",
+      "name": "Bookstore Web App",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      },
+      "redirectUris": [
+        "http://localhost:5173/*",
+        "https://bookstore.example.com/*"
+      ],
+      "webOrigins": [
+        "http://localhost:5173",
+        "https://bookstore.example.com"
+      ],
+      "protocol": "openid-connect"
+    },
+    {
+      "clientId": "bookstore-api",
+      "name": "Bookstore API",
+      "enabled": true,
+      "publicClient": false,
+      "bearerOnly": true,
+      "protocol": "openid-connect"
+    }
+  ],
+  "roles": {
+    "realm": [
+      { "name": "customer", "description": "Regular store customer" },
+      { "name": "admin", "description": "Store administrator" }
+    ]
+  },
+  "defaultRoles": ["customer"]
+}

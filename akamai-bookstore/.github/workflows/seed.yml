@@ -1,0 +1,57 @@
+name: Seed Production Data
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_embeddings:
+        description: 'Also generate embeddings (slow, ~5 min)'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  seed:
+    name: Seed books + index Meilisearch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install script deps
+        working-directory: akamai-bookstore/backend
+        run: npm ci
+
+      - name: Run book seed
+        working-directory: akamai-bookstore
+        run: npx tsx scripts/seed.ts
+        env:
+          POSTGRES_HOST: ${{ secrets.PROD_POSTGRES_HOST }}
+          POSTGRES_DB: bookstore
+          POSTGRES_USER: bookstore
+          POSTGRES_PASSWORD: ${{ secrets.PROD_POSTGRES_PASSWORD }}
+
+      - name: Index Meilisearch
+        working-directory: akamai-bookstore
+        run: npx tsx scripts/index-meilisearch.ts
+        env:
+          POSTGRES_HOST: ${{ secrets.PROD_POSTGRES_HOST }}
+          POSTGRES_DB: bookstore
+          POSTGRES_USER: bookstore
+          POSTGRES_PASSWORD: ${{ secrets.PROD_POSTGRES_PASSWORD }}
+          MEILI_HOST: ${{ secrets.PROD_MEILI_HOST }}
+          MEILI_MASTER_KEY: ${{ secrets.PROD_MEILI_MASTER_KEY }}
+
+      - name: Generate embeddings
+        if: ${{ inputs.run_embeddings == 'true' }}
+        working-directory: akamai-bookstore
+        run: |
+          pip install asyncpg sentence-transformers
+          python scripts/generate-embeddings.py
+        env:
+          POSTGRES_HOST: ${{ secrets.PROD_POSTGRES_HOST }}
+          POSTGRES_DB: bookstore
+          POSTGRES_USER: bookstore
+          POSTGRES_PASSWORD: ${{ secrets.PROD_POSTGRES_PASSWORD }}

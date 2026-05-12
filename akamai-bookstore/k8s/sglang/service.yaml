@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sglang
+  namespace: bookstore
+spec:
+  selector:
+    app: sglang
+  ports:
+    - name: http
+      port: 30000
+      targetPort: 30000
