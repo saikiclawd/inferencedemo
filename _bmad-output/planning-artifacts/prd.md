@@ -19,7 +19,7 @@ Akamai Bookstore is a production-grade ecommerce demo that shows how an AWS-styl
 - Provide a credible bookstore shopping experience with catalog browsing, search, cart, checkout, and order history.
 - Showcase AI-assisted shopping through BookBot, using retrieval augmented generation over catalog data.
 - Validate migration patterns from AWS managed services to portable open-source equivalents.
-- Provide clear implementation artifacts for future agents and developers to extend the app consistently.
+- Provide clear implementation artifacts for developers to extend the app consistently.
 
 ## 3. Users
 
@@ -138,7 +138,7 @@ Maintains the React frontend, Fastify backend, FastAPI AI service, data scripts,
 - Checkout updates order history and bestsellers.
 - Recommendations return vector-similar books after embeddings are generated.
 - BookBot streams helpful responses grounded in catalog data.
-- Documentation is complete enough for a developer or agent to make the next feature change without rediscovering architecture.
+- Documentation is complete enough for a developer to make the next feature change without rediscovering architecture.
 
 ## 8. Product Risks And Review Findings
 
