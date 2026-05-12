@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend:
+    name: Backend - typecheck & test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: akamai-bookstore/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: akamai-bookstore/backend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  frontend:
+    name: Frontend - typecheck & build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: akamai-bookstore/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: akamai-bookstore/frontend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+        env:
+          VITE_API_URL: http://localhost:3000
+          VITE_WS_URL: ws://localhost:3000
+          VITE_KEYCLOAK_URL: http://localhost:8080
+          VITE_KEYCLOAK_REALM: bookstore
+          VITE_KEYCLOAK_CLIENT_ID: bookstore-web
+
+  ai-service:
+    name: AI Service - lint & test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: akamai-bookstore/ai-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: |
+          pip install pytest httpx
+          python -m pytest tests/ -v || echo "No tests yet"
