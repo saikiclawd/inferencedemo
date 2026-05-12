@@ -109,8 +109,28 @@ jobs:
           helm repo update
           helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
             --namespace ingress-nginx --create-namespace \
-            --set controller.service.type=LoadBalancer \
-            --wait --timeout=5m
+            --set controller.service.type=LoadBalancer
+
+          # Wait for controller pods to be ready
+          kubectl rollout status deployment/ingress-nginx-controller \
+            -n ingress-nginx --timeout=5m
+
+          # Wait for NodeBalancer IP (LKE provisioning can take up to 8 min)
+          echo "Waiting for NodeBalancer IP..."
+          for i in $(seq 1 48); do
+            IP=$(kubectl get svc ingress-nginx-controller -n ingress-nginx \
+              -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null)
+            if [ -n "$IP" ]; then
+              echo "NodeBalancer IP: $IP"
+              break
+            fi
+            echo "  attempt $i/48 — not ready yet, waiting 10s..."
+            sleep 10
+          done
+          if [ -z "$IP" ]; then
+            echo "Timed out waiting for NodeBalancer IP"
+            exit 1
+          fi
 
       - name: Apply base Kubernetes resources
         run: |
@@ -169,13 +189,6 @@ jobs:
             akamai-bookstore/k8s/jobs/seed-job.yaml | kubectl apply -f -
           kubectl wait job/bookstore-seed -n bookstore \
             --for=condition=complete --timeout=10m
-
-      - name: Get NodeBalancer IP
-        run: |
-          IP=$(kubectl get svc ingress-nginx-controller -n ingress-nginx \
-            -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-          echo "NodeBalancer IP: $IP"
-          echo "App reachable at: http://$IP"
 
       - name: Purge Akamai CDN cache
         run: |
