@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: bookstore-seed
+  namespace: bookstore
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: seeder
+          image: ghcr.io/saikiclawd/bookstore-seeder:latest
+          env:
+            - name: POSTGRES_HOST
+              value: "postgres"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: "bookstore"
+            - name: POSTGRES_USER
+              value: "bookstore"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: POSTGRES_PASSWORD
+            - name: MEILI_HOST
+              value: "http://meilisearch:7700"
+            - name: MEILI_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: MEILI_MASTER_KEY
+            - name: REDIS_URL
+              value: "redis://redis:6379"
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "1"
+              memory: "2Gi"
