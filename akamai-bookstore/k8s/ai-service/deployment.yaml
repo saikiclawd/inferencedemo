@@ -24,7 +24,7 @@ spec:
                       - g2-gpu-rtx4000a1-s
       containers:
         - name: ai-service
-          image: ghcr.io/YOUR_ORG/bookstore-ai-service:latest
+          image: ghcr.io/saikiclawd/bookstore-ai-service:latest
           ports:
             - containerPort: 8000
           env:
@@ -64,10 +64,10 @@ spec:
           resources:
             requests:
               cpu: 500m
-              memory: 2Gi
+              memory: 512Mi
             limits:
               cpu: 4
-              memory: 8Gi
+              memory: 4Gi
           livenessProbe:
             httpGet:
               path: /health

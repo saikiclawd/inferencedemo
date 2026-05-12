@@ -24,7 +24,7 @@ spec:
                       - g2-gpu-rtx4000a1-s
       containers:
         - name: frontend
-          image: ghcr.io/YOUR_ORG/bookstore-frontend:latest
+          image: ghcr.io/saikiclawd/bookstore-frontend:latest
           ports:
             - containerPort: 80
           resources:
