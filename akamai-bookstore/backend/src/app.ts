@@ -60,7 +60,7 @@ export function buildApp() {
 
   app.get('/health', async (_, reply) => {
     const pgOk = await app.pg.query('SELECT 1').then(() => 'ok').catch(() => 'error')
-    const redisOk = await app.redis.ping().then(() => 'ok').catch(() => 'error')
+    const redisOk = app.redis.status === 'ready' ? 'ok' : app.redis.status
     return reply.send({ status: 'ok', postgres: pgOk, redis: redisOk })
   })
 

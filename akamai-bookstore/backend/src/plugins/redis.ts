@@ -11,6 +11,9 @@ const redisPlugin: FastifyPluginAsync = async (fastify) => {
     connectTimeout: 10_000,
     maxRetriesPerRequest: 3,
   })
+  redis.on('error', (error) => {
+    fastify.log.warn({ err: error }, 'Redis connection error')
+  })
 
   fastify.decorate('redis', redis)
   fastify.addHook('onClose', async () => {
