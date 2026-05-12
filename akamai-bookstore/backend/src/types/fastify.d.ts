@@ -1,5 +1,5 @@
 import { PostgresDb } from '@fastify/postgres'
-import { FastifyRedis } from '@fastify/redis'
+import Redis from 'ioredis'
 import { MeiliSearch } from 'meilisearch'
 import { FastifyRequest, FastifyReply } from 'fastify'
 
@@ -16,7 +16,7 @@ export interface JWTPayload {
 declare module 'fastify' {
   interface FastifyInstance {
     pg: PostgresDb & PostgresDb['pool']
-    redis: FastifyRedis
+    redis: Redis
     meilisearch: MeiliSearch
     verifyJWT: (request: FastifyRequest, reply: FastifyReply) => Promise<void>
   }

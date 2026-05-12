@@ -1,16 +1,20 @@
 import fp from 'fastify-plugin'
-import fastifyRedis from '@fastify/redis'
+import Redis from 'ioredis'
 import { FastifyPluginAsync } from 'fastify'
 import { config } from '../config.js'
 
 const redisPlugin: FastifyPluginAsync = async (fastify) => {
-  await fastify.register(fastifyRedis, {
-    url: config.REDIS_URL,
+  const redis = new Redis(config.REDIS_URL, {
     lazyConnect: true,
     enableReadyCheck: false,
     family: 4,
     connectTimeout: 10_000,
     maxRetriesPerRequest: 3,
+  })
+
+  fastify.decorate('redis', redis)
+  fastify.addHook('onClose', async () => {
+    await redis.quit().catch(() => redis.disconnect())
   })
 }
 
