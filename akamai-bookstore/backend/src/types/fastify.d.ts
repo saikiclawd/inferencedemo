@@ -1,5 +1,5 @@
 import { PostgresDb } from '@fastify/postgres'
-import Redis from 'ioredis'
+import { Redis } from 'ioredis'
 import { MeiliSearch } from 'meilisearch'
 import { FastifyRequest, FastifyReply } from 'fastify'
 
