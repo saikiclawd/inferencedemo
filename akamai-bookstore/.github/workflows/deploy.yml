@@ -1,6 +1,7 @@
 name: Build & Deploy to LKE
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
 
