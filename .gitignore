@@ -1,0 +1,35 @@
+.DS_Store
+
+# Local agent/tooling installs not part of the bookstore app
+.agents/
+.claude/
+.cursor/
+InferenceDemo/
+
+# BMAD runtime/config artifacts kept local unless intentionally exported
+_bmad/
+
+# Local env and secrets
+.env
+*.env.local
+*.pem
+*.key
+*.crt
+kubeconfig
+kubeconfig.yaml
+*kubeconfig*.yaml
+
+# Generated dependency/build artifacts
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+.venv*/
+venv/
+.pytest_cache/
+.mypy_cache/
+coverage/
+.vitest/

@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sglang
+  namespace: bookstore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sglang
+  template:
+    metadata:
+      labels:
+        app: sglang
+    spec:
+      containers:
+        - name: sglang
+          image: lmsysorg/sglang:latest-runtime
+          command:
+            - /bin/bash
+            - -lc
+            - |
+              python3 -m pip install --no-cache-dir distro
+              python3 -m sglang.launch_server \
+                --model-path Qwen/Qwen3-8B \
+                --host 0.0.0.0 \
+                --port 30000 \
+                --api-key "${LLM_API_KEY}"
+          ports:
+            - containerPort: 30000
+          env:
+            - name: LLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: LLM_API_KEY
+            - name: HF_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: HF_TOKEN
+                  optional: true
+          resources:
+            requests:
+              cpu: "2"
+              memory: 8Gi
+              nvidia.com/gpu: "1"
+            limits:
+              cpu: "4"
+              memory: 12Gi
+              nvidia.com/gpu: "1"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 30000
+            initialDelaySeconds: 120
+            periodSeconds: 30
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 30000
+            initialDelaySeconds: 180
+            periodSeconds: 60

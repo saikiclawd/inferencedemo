@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: bookstore
+data:
+  NODE_ENV: production
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: bookstore
+  POSTGRES_USER: bookstore
+  REDIS_URL: redis://redis:6379
+  MEILI_HOST: http://meilisearch:7700
+  KEYCLOAK_URL: http://keycloak:8080
+  KEYCLOAK_REALM: bookstore
+  KEYCLOAK_CLIENT_ID: bookstore-api
+  KEYCLOAK_JWKS_URI: http://keycloak:8080/realms/bookstore/protocol/openid-connect/certs
+  AI_SERVICE_URL: http://ai-service:8000
