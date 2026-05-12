@@ -32,7 +32,9 @@ export default function BookBot() {
 
   function connectWs() {
     const token = keycloak.token ?? ''
-    const wsUrl = import.meta.env.VITE_WS_URL as string
+    const wsUrl =
+      (import.meta.env.VITE_WS_URL as string | undefined) ??
+      `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`
     const ws = new WebSocket(`${wsUrl}/api/assistant?token=${token}`)
 
     ws.onopen = () => setConnected(true)
