@@ -59,9 +59,11 @@ export function buildApp() {
   app.register(assistantRoute)
 
   app.get('/health', async (_, reply) => {
-    const pgOk = await app.pg.query('SELECT 1').then(() => 'ok').catch(() => 'error')
-    const redisOk = app.redis.status === 'ready' ? 'ok' : app.redis.status
-    return reply.send({ status: 'ok', postgres: pgOk, redis: redisOk })
+    return reply.send({
+      status: 'ok',
+      postgres: 'not_checked',
+      redis: app.redis.status,
+    })
   })
 
   app.setErrorHandler((error, _request, reply) => {
