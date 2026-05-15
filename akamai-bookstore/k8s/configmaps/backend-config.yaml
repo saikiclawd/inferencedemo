@@ -16,3 +16,4 @@ data:
   KEYCLOAK_CLIENT_ID: bookstore-api
   KEYCLOAK_JWKS_URI: http://keycloak:8080/realms/bookstore/protocol/openid-connect/certs
   AI_SERVICE_URL: http://ai-service:8000
+  AI_ENABLED: "false"

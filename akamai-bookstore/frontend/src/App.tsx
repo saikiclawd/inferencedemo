@@ -12,6 +12,8 @@ import Orders from './pages/Orders.tsx'
 import Search from './pages/Search.tsx'
 
 export default function App() {
+  const aiEnabled = import.meta.env.VITE_ENABLE_AI === 'true'
+
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-gray-50">
@@ -39,7 +41,7 @@ export default function App() {
             }
           />
         </Routes>
-        <BookBot />
+        {aiEnabled ? <BookBot /> : null}
         <Toaster position="bottom-left" />
       </div>
     </BrowserRouter>

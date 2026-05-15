@@ -2,6 +2,12 @@ name: Build & Deploy to LKE
 
 on:
   workflow_dispatch:
+    inputs:
+      deploy_ai:
+        description: Deploy the optional AI service and SGLang stack
+        required: false
+        default: false
+        type: boolean
   push:
     branches: [main]
 
@@ -10,7 +16,7 @@ env:
   IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/bookstore
 
 jobs:
-  build-and-push:
+  build-core:
     name: Build & push ${{ matrix.service }}
     runs-on: ubuntu-latest
     permissions:
@@ -18,7 +24,7 @@ jobs:
       packages: write
     strategy:
       matrix:
-        service: [frontend, backend, ai-service]
+        service: [frontend, backend]
     steps:
       - uses: actions/checkout@v4
 
@@ -48,6 +54,38 @@ jobs:
             VITE_KEYCLOAK_URL=${{ vars.VITE_KEYCLOAK_URL }}
             VITE_KEYCLOAK_REALM=${{ vars.VITE_KEYCLOAK_REALM }}
             VITE_KEYCLOAK_CLIENT_ID=${{ vars.VITE_KEYCLOAK_CLIENT_ID }}
+            VITE_ENABLE_AI=false
+
+  build-ai:
+    name: Build & push ai-service
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_ai }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push ai-service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./akamai-bookstore/ai-service
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}-ai-service:${{ github.sha }}
+            ${{ env.IMAGE_PREFIX }}-ai-service:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   build-seeder:
     name: Build & push seeder
@@ -82,7 +120,7 @@ jobs:
 
   deploy:
     name: Deploy to LKE
-    needs: [build-and-push, build-seeder]
+    needs: [build-core, build-seeder]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -162,23 +200,21 @@ jobs:
           kubectl apply -f akamai-bookstore/k8s/redis/
           kubectl apply -f akamai-bookstore/k8s/meilisearch/
           kubectl apply -f akamai-bookstore/k8s/keycloak/
-          kubectl apply -f akamai-bookstore/k8s/sglang/
           kubectl apply -f akamai-bookstore/k8s/backend/
-          kubectl apply -f akamai-bookstore/k8s/ai-service/
           kubectl apply -f akamai-bookstore/k8s/frontend/
           kubectl apply -f akamai-bookstore/k8s/ingress/
 
       - name: Roll out new images
         run: |
           SHA=${{ github.sha }}
+          kubectl scale deployment/sglang --replicas=0 -n bookstore --timeout=2m || true
+          kubectl scale deployment/ai-service --replicas=0 -n bookstore --timeout=2m || true
           kubectl set image deployment/backend    backend=${{ env.IMAGE_PREFIX }}-backend:$SHA    -n bookstore
-          kubectl set image deployment/ai-service ai-service=${{ env.IMAGE_PREFIX }}-ai-service:$SHA -n bookstore
           kubectl set image deployment/frontend   frontend=${{ env.IMAGE_PREFIX }}-frontend:$SHA   -n bookstore
 
       - name: Wait for rollouts
         run: |
           kubectl rollout status deployment/backend    -n bookstore --timeout=5m
-          kubectl rollout status deployment/ai-service -n bookstore --timeout=10m
           kubectl rollout status deployment/frontend   -n bookstore --timeout=5m
 
       - name: Seed catalog data
@@ -198,3 +234,37 @@ jobs:
             --network production \
             --edgerc <(echo "${{ secrets.AKAMAI_EDGERC }}")
         continue-on-error: true
+
+  deploy-ai:
+    name: Deploy AI to LKE
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_ai }}
+    needs: [deploy, build-ai]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.30.0'
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Apply AI Kubernetes resources
+        run: |
+          kubectl apply -f akamai-bookstore/k8s/sglang/
+          kubectl apply -f akamai-bookstore/k8s/ai-service/
+
+      - name: Roll out AI images
+        run: |
+          SHA=${{ github.sha }}
+          kubectl set image deployment/ai-service ai-service=${{ env.IMAGE_PREFIX }}-ai-service:$SHA -n bookstore
+
+      - name: Wait for AI rollout
+        run: |
+          kubectl rollout status deployment/sglang -n bookstore --timeout=10m
+          kubectl rollout status deployment/ai-service -n bookstore --timeout=15m

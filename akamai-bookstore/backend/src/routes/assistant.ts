@@ -33,6 +33,13 @@ const assistantRoute: FastifyPluginAsync = async (fastify) => {
     { websocket: true },
     (connection, req) => {
       const socket = connection.socket
+
+      if (!config.AI_ENABLED) {
+        socket.send(JSON.stringify({ type: 'error', message: 'BookBot is disabled for this deployment phase.' }))
+        socket.close(1013, 'AI disabled')
+        return
+      }
+
       const token = (req.query as Record<string, string>).token
 
       if (!token) {
@@ -108,6 +115,10 @@ const assistantRoute: FastifyPluginAsync = async (fastify) => {
   )
 
   fastify.post('/api/assistant/chat', { preHandler: [fastify.verifyJWT] }, async (request, reply) => {
+    if (!config.AI_ENABLED) {
+      return reply.code(503).send({ error: 'AI service disabled', code: 'AI_DISABLED' })
+    }
+
     const body = ChatBodySchema.parse(request.body)
     const userId = request.user.sub
 

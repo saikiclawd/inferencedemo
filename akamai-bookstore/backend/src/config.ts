@@ -14,6 +14,7 @@ const EnvSchema = z.object({
   KEYCLOAK_JWKS_URI: z.string().url(),
   KEYCLOAK_REALM: z.string().default('bookstore'),
   AI_SERVICE_URL: z.string().url().default('http://localhost:8000'),
+  AI_ENABLED: z.coerce.boolean().default(false),
   AKAMAI_OBJECT_STORAGE_ENDPOINT: z.string().url().optional(),
   AKAMAI_OBJECT_STORAGE_BUCKET: z.string().optional(),
   AKAMAI_ACCESS_KEY: z.string().optional(),
