@@ -74,6 +74,12 @@ spec:
               port: 8000
             initialDelaySeconds: 60
             periodSeconds: 30
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            periodSeconds: 10
+            failureThreshold: 30
           readinessProbe:
             httpGet:
               path: /health
