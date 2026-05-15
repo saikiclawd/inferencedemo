@@ -1,13 +1,11 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from app.dependencies import init_db, close_db, init_meili
+from app.dependencies import close_db
 from app.routers import chat, embeddings
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
-    init_meili()
     yield
     await close_db()
 

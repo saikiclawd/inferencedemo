@@ -34,11 +34,11 @@ def init_meili() -> None:
 
 async def get_db() -> asyncpg.Pool:
     if _db_pool is None:
-        raise RuntimeError("DB pool not initialized")
+        await init_db()
     return _db_pool
 
 
 async def get_meili() -> MeiliAsyncClient:
     if _meili_client is None:
-        raise RuntimeError("Meili client not initialized")
+        init_meili()
     return _meili_client
